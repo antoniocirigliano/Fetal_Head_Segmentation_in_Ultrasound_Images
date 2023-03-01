@@ -1,6 +1,22 @@
+# Setup Visual Studio Code gpu runtime environment
+
+#!pip install segmentation-models-pytorch
+#!pip install -U git+https://github.com/albumentations-team/albumentations
+#!pip install --upgrade opencv-contrib-python
+
+# DGX
+
+import os
+import warnings
+
+warnings.filterwarnings("ignore")
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.getcwd()
+
+# Some Common Imports
+
 import torch 
 import cv2
-import os
 import numpy as np 
 import pandas as pd
 import matplotlib.pyplot as plt 
@@ -8,8 +24,10 @@ from sklearn.model_selection import train_test_split
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 
-img_path = "/content/drive/MyDrive/Image_segmentation/all_img_head"
-mask_path = "/content/drive/MyDrive/Image_segmentation/all_masks_head_bw"
+# Setup Configurations
+
+img_path = "data/all_img"
+mask_path = "data/all_masks"
 
 img_files = [f for f in os.listdir(img_path) if f.endswith('.jpeg')]
 mask_files = [f for f in os.listdir(mask_path) if f.endswith('.png')]
@@ -25,10 +43,15 @@ dataset = [(img_path + '/' + f, mask_path + '/' + f.replace('.png', '.png')) for
 df = pd.DataFrame(dataset, columns=['images', 'masks'])
 df.to_csv('file.csv', index=False)
 
-CSV_FILE = '/content/file.csv'
-DATA_DIR = '/content/'
+CSV_FILE = 'file.csv'
+DATA_DIR = '/home/antonio/workspace/ucl-thesis'
 
-DEVICE = 'cpu'
+#DEVICE = 'cpu'
+
+if torch.cuda.is_available():
+    DEVICE = 'cuda'
+else:
+    DEVICE = 'cpu'
 
 EPOCHS = 25
 LR = 0.003
@@ -38,27 +61,29 @@ BATCH_SIZE = 16
 Encoder = 'timm-efficientnet-b0'
 weights = 'imagenet'
 
-df = pd.read_csv(CSV_FILE)
-df.head()
+#df = pd.read_csv(CSV_FILE)
+#f.head()
 
-row = df.iloc[2]
+#row = df.iloc[12]
 
-image_path = row.images
-mask_path = row.masks
+#image_path = row.images
+#mask_path = row.masks
 
-image = cv2.imread(image_path)
+#image = cv2.imread(image_path)
 
-mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE) / 255.0
+#mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE) / 255.0
 
-f, (ax1, ax2) = plt.subplots(1, 2, figsize=(10,5))
+#f, (ax1, ax2) = plt.subplots(1, 2, figsize=(10,5))
         
-ax1.set_title('IMAGE')
-ax1.imshow(image)
+#ax1.set_title('IMAGE')
+#ax1.imshow(image)
 
-ax2.set_title('GROUND TRUTH')
-ax2.imshow(mask)
+#ax2.set_title('GROUND TRUTH')
+#ax2.imshow(mask)
 
 train_df, valid_df = train_test_split(df, test_size = 0.2, random_state = 42)
+
+# Augmentation Functions
 
 import albumentations as A
 
@@ -74,6 +99,8 @@ def get_valid_augs():
       A.Resize(IMG_SIZE, IMG_SIZE),
       
   ])
+
+# Create Custom Dataset
 
 from torch.utils.data import Dataset
 
@@ -113,43 +140,21 @@ class SegmentationDataset(Dataset):
 
     return image, mask
 
+
 trainset = SegmentationDataset(train_df, get_train_augs())
 validset = SegmentationDataset(valid_df, get_train_augs())
 
 print(f"Size of Trainset : {len(trainset)}")
 print(f"Size of Validset : {len(validset)}")
 
-import matplotlib.pyplot as plt 
+import Plot1
 
-def show_image(image,mask,pred_image = None):
-    
-    if pred_image == None:
-        
-        f, (ax1, ax2) = plt.subplots(1, 2, figsize=(10,5))
-        
-        ax1.set_title('IMAGE')
-        ax1.imshow(image.permute(1,2,0).squeeze(),cmap = 'gray')
-        
-        ax2.set_title('GROUND TRUTH')
-        ax2.imshow(mask.permute(1,2,0).squeeze(),cmap = 'gray')
-        
-    elif pred_image != None :
-        
-        f, (ax1, ax2,ax3) = plt.subplots(1, 3, figsize=(10,5))
-        
-        ax1.set_title('IMAGE')
-        ax1.imshow(image.permute(1,2,0).squeeze(),cmap = 'gray')
-        
-        ax2.set_title('GROUND TRUTH')
-        ax2.imshow(mask.permute(1,2,0).squeeze(),cmap = 'gray')
-        
-        ax3.set_title('MODEL OUTPUT')
-        ax3.imshow(pred_image.permute(1,2,0).squeeze(),cmap = 'gray')
+#idx = 8
 
-idx = 5
+#image, mask = trainset[idx]
+#show_image(image, mask)
 
-image, mask = trainset[idx]
-show_image(image, mask)
+# Load Dataset Into Batches
 
 from torch.utils.data import DataLoader
 
@@ -164,6 +169,8 @@ for image, mask in trainloader:
   
 print(f"One batch image shape : {image.shape}")
 print(f"One batch mask shape : {mask.shape}")
+
+# Create Segmentation Model
 
 from torch import nn
 import segmentation_models_pytorch as sample_data
@@ -196,6 +203,8 @@ class SegmentationModel(nn.Module):
 
 model = SegmentationModel()
 model.to(DEVICE);
+
+# Create Train and Validation Function
 
 def train_fn(data_loader, model, optimizer):
 
@@ -233,13 +242,23 @@ def eval_fn(data_loader, model):
   
   return total_loss / len(data_loader)
 
+# Train Model
+
 optimizer = torch.optim.Adam(model.parameters(), lr = LR)
+
+# Initialize lists to store the loss values for the train set and the validation set
+train_loss_list = []
+val_loss_list = []
 
 best_valid_loss = np.Inf
 
 for i in range(EPOCHS):
   train_loss = train_fn(trainloader, model, optimizer)
   valid_loss = eval_fn(validloader, model)
+
+  # Append the loss values to the lists
+  train_loss_list.append(train_loss)
+  val_loss_list.append(valid_loss)
 
   if valid_loss < best_valid_loss:
     torch.save(model.state_dict(), 'best_model.pt')
@@ -248,14 +267,86 @@ for i in range(EPOCHS):
 
   print(f"Epoch _ {i+1} Train_loss : {train_loss} Valid_loss : {valid_loss}")
 
-idx = 26
+# Plot the loss for the train set and the validation set
+plt.plot(train_loss_list, label='Train Loss')
+plt.plot(val_loss_list, label='Validation Loss')
 
-model.load_state_dict(torch.load('/content/best_model.pt'))
+# Add labels and title to the plot
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.title('Loss Trend on Train and Validation Sets')
 
-image, mask = validset[idx]
+# Show the legend
+plt.legend()
 
-logits_masks = model(image.to(DEVICE).unsqueeze(0)) #(C, H, W) -> (1, C, H, W)
-pred_mask = torch.sigmoid(logits_masks)
-pred_mask = (pred_mask > 0.5)*1.0
+# Save the plot to a file
+plt.savefig('loss_trend.png')
 
-show_image(image, mask, pred_mask.detach().cpu().squeeze(0))
+# Show the plot
+plt.show()
+
+# Inference
+
+model.load_state_dict(torch.load('best_model.pt'))
+
+for idx in range(len(validset)):
+    image, mask = validset[idx]
+
+    logits_masks = model(image.to(DEVICE).unsqueeze(0)) #(C, H, W) -> (1, C, H, W)
+    pred_mask = torch.sigmoid(logits_masks)
+    pred_mask = (pred_mask > 0.5)*1.0
+
+    show_image(image, mask, pred_mask.detach().cpu().squeeze(0))
+
+# IOU
+
+def iou(pred, target):
+    """
+    Compute the Intersection over Union (IoU) between the predicted segmentation and the ground truth segmentation.
+
+    Arguments:
+    - pred: a PyTorch tensor of shape (batch_size, H, W) representing the predicted segmentation
+    - target: a PyTorch tensor of shape (batch_size, H, W) representing the ground truth segmentation
+
+    Returns:
+    - iou: a PyTorch tensor of shape (batch_size) representing the IoU between the predicted segmentation and the ground truth segmentation
+    """
+    # Move the tensors to the same device
+    device = pred.device
+    target = target.to(device)
+
+    # Convert the tensors to binary arrays
+    pred = (pred > 0.5).float()
+    target = (target > 0.5).float()
+
+    # Compute the area of overlap
+    pred = pred.to(device)
+    intersection = (pred * target).sum((1, 2))
+
+    # Compute the area of union
+    union = (pred + target).sum((1, 2)) - intersection
+
+    # Compute the IoU
+    iou = (intersection + 1e-6) / (union + 1e-6)
+
+    return iou
+
+
+# Initialize a list to store the IoUs for each image
+ious = []
+
+for idx, (image, mask) in enumerate(validset):
+    # Compute the predictions
+    pred_mask = model(image.to(DEVICE).unsqueeze(0))
+
+    # Compute the IoU for this image
+    iou_value = iou(pred_mask.squeeze(0), mask)
+
+    # Append the computed IoU to the list
+    ious.append(iou_value)
+
+# Calculate the average IoU across all images
+avg_iou = torch.mean(torch.stack(ious))
+
+# Print the result
+print("The average IoU across all {} images in the validation set is {:.4f}".format(len(validset), avg_iou))
