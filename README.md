@@ -23,6 +23,7 @@ fetal-head-segmentation-thesis/
 ├── README.md                # Project description
 ├── LICENSE                  # MIT License
 └── requirements.txt         # Python dependencies
+```
 
 ---
 
@@ -66,3 +67,11 @@ The project is implemented in Python with:
 Install all dependencies with:
 ```bash
 pip install -r requirements.txt
+```
+
+---
+
+## 📜 License
+
+This project is released under the MIT License.
+
