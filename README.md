@@ -2,7 +2,7 @@
 
 This repository contains the code and experiments developed for my Master's thesis project, focused on **fetal head segmentation in prenatal ultrasound images** using deep learning.
 
-The project explores different strategies based on the **UNet architecture**, including supervised, semi-supervised, and multi-task learning, with extensions for both image and video processing.
+The project explores different strategies based on the **UNet architecture**, including supervised, semi-supervised and multi-task learning, with extensions for both image and video processing.
 
 ---
 
@@ -10,11 +10,11 @@ The project explores different strategies based on the **UNet architecture**, in
 
 ```bash
 fetal-head-segmentation-thesis/
-├── image_processing/        # Utilities and scripts for preprocessing and handling images
+├── Image_processing/        # Utilities and scripts for preprocessing and handling images
 ├── supervised_unet/         # Supervised UNet model training and evaluation
 ├── semi_supervised_unet/    # Semi-supervised UNet with labeled + unlabeled data
 ├── multitask_unet/          # Multi-task UNet for segmentation + classification
-├── video_processing/        # Scripts and methods for processing ultrasound videos
+├── Video_processing/        # Scripts and methods for processing ultrasound videos
 │
 ├── notebooks/               # Jupyter Notebooks for experiments and visualization
 ├── results/                 # Segmentation outputs, plots, and evaluation metrics
