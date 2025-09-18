@@ -1,0 +1,9 @@
+torch
+pytorch-lightning
+segmentation-models-pytorch
+torchmetrics
+timm
+scikit-learn
+matplotlib
+numpy
+pandas
