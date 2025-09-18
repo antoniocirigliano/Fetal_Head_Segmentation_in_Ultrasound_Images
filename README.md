@@ -8,24 +8,21 @@ The project explores different strategies based on the **UNet architecture**, in
 
 ## 📂 Repository Structure
 
+```bash
 fetal-head-segmentation-thesis/
+├── image_processing/        # Utilities and scripts for preprocessing and handling images
+├── supervised_unet/         # Supervised UNet model training and evaluation
+├── semi_supervised_unet/    # Semi-supervised UNet with labeled + unlabeled data
+├── multitask_unet/          # Multi-task UNet for segmentation + classification
+├── video_processing/        # Scripts and methods for processing ultrasound videos
 │
-├── image_processing/ # Utilities and scripts for preprocessing and handling images
-├── supervised_unet/ # Supervised UNet model training and evaluation
-├── semi_supervised_unet/ # Semi-supervised UNet with labeled + unlabeled data
-├── multitask_unet/ # Multi-task UNet for segmentation + classification
-├── video_processing/ # Scripts and methods for processing ultrasound videos
+├── notebooks/               # Jupyter Notebooks for experiments and visualization
+├── results/                 # Segmentation outputs, plots, and evaluation metrics
+├── thesis/                  # LaTeX source of the thesis
 │
-├── notebooks/ # Jupyter Notebooks for experiments and visualization
-├── results/ # Segmentation outputs, plots, and evaluation metrics
-├── thesis/ # LaTeX source of the thesis
-│
-├── README.md # Project description
-├── LICENSE # MIT License
-└── requirements.txt # Python dependencies
-
-yaml
-Copia codice
+├── README.md                # Project description
+├── LICENSE                  # MIT License
+└── requirements.txt         # Python dependencies
 
 ---
 
