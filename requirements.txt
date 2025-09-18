@@ -1,9 +1,17 @@
 torch
+torchvision
+torchaudio
 pytorch-lightning
 segmentation-models-pytorch
 torchmetrics
 timm
+albumentations
+opencv-python
 scikit-learn
+scipy
 matplotlib
+seaborn
 numpy
 pandas
+jupyter
+notebook
