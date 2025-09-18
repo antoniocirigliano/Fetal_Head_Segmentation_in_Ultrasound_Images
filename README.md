@@ -11,14 +11,10 @@ The project explores different strategies based on the **UNet architecture**, in
 ```bash
 fetal-head-segmentation-thesis/
 ├── Image_processing/        # Utilities and scripts for preprocessing and handling images
-├── supervised_unet/         # Supervised UNet model training and evaluation
-├── semi_supervised_unet/    # Semi-supervised UNet with labeled + unlabeled data
-├── multitask_unet/          # Multi-task UNet for segmentation + classification
+├── Supervised UNet/         # Supervised UNet model training and evaluation
+├── Semi_supervised UNet/    # Semi-supervised UNet with labeled + unlabeled data
+├── Multitask UNet/          # Multi-task UNet for segmentation + classification
 ├── Video_processing/        # Scripts and methods for processing ultrasound videos
-│
-├── notebooks/               # Jupyter Notebooks for experiments and visualization
-├── results/                 # Segmentation outputs, plots, and evaluation metrics
-├── thesis/                  # LaTeX source of the thesis
 │
 ├── README.md                # Project description
 ├── LICENSE                  # MIT License
